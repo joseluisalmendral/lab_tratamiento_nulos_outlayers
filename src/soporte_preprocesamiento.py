@@ -12,6 +12,11 @@ import math
 # -----------------------------------------------------------------------
 import seaborn as sns
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+
+
+#! FUNCIONES
+#!-------------
 
 def exploracion_datos(dataframe):
 
@@ -62,6 +67,12 @@ def exploracion_datos(dataframe):
     print("Las características principales del dataframe son:")
     display(dataframe.info())
 
+
+
+
+#! CLASE
+#!-------------
+
 class Visualizador:
     """
     Clase para visualizar la distribución de variables numéricas y categóricas de un DataFrame.
@@ -103,30 +114,13 @@ class Visualizador:
 
         Parameters:
         - color (str, opcional): El color a utilizar en las gráficas. Por defecto es "grey".
-        - tamano_grafica (tuple, opcional): El tamaño base de la figura de la gráfica. Por defecto es (15, 5).
+        - tamaño_grafica (tuple, opcional): El tamaño de la figura de la gráfica. Por defecto es (15, 5).
         """
         lista_num = self.separar_dataframes()[0].columns
-        ncols = 3  # Fijamos el número de columnas en 3
-        nrows = math.ceil(len(lista_num) / ncols)  # Calculamos el número de filas necesario
-
-        # Ajustamos el tamaño de la figura para que crezca en función del número de filas
-        fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(tamano_grafica[0], tamano_grafica[1] * nrows), sharey=False)
+        _, axes = plt.subplots(nrows = 2, ncols = math.ceil(len(lista_num)/2), figsize=tamano_grafica, sharey=True)
         axes = axes.flat
-
-        for indice, columna in enumerate(lista_num):
-            sns.histplot(
-                x=columna, 
-                data=self.dataframe, 
-                ax=axes[indice], 
-                color=color, 
-                bins=50, 
-                kde=True
-            )
-
-        # Si hay ejes sobrantes, los eliminamos
-        for ax in axes[len(lista_num):]:
-            fig.delaxes(ax)
-
+        for indice, columna in tqdm(enumerate(lista_num)):
+            sns.histplot(x=columna, data=self.dataframe, ax=axes[indice], color=color, bins=20)
         plt.suptitle("Distribución de variables numéricas")
         plt.tight_layout()
 
@@ -244,7 +238,7 @@ class Visualizador:
         plt.xlabel("Month");
 
 
-    def deteccion_outliers(self, color = "grey", tamanio = (15, 5)):
+    def deteccion_outliers(self, color = "grey"):
 
         """
         Detecta y visualiza valores atípicos en un DataFrame.
@@ -259,25 +253,20 @@ class Visualizador:
         """
 
         lista_num = self.separar_dataframes()[0].columns
-        ncols = 3  # Fijamos el número de columnas en 3
-        nrows = math.ceil(len(lista_num) / ncols)  # Calculamos el número de filas necesario
 
-        fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=tamanio)
+        fig, axes = plt.subplots(2, ncols = math.ceil(len(lista_num)/2), figsize=(15,5))
         axes = axes.flat
 
         for indice, columna in enumerate(lista_num):
-            sns.boxplot(
-                x=columna, 
-                data=self.dataframe, 
-                ax=axes[indice], 
-                color=color, 
-                flierprops={'markersize': 4, 'markerfacecolor': 'orange'}
-            )
+            sns.boxplot(x=columna, data=self.dataframe, 
+                        ax=axes[indice], 
+                        color=color, 
+                        flierprops={'markersize': 4, 'markerfacecolor': 'orange'})
 
-        # Si hay ejes sobrantes, los eliminamos
-        for ax in axes[len(lista_num):]:
-            fig.delaxes(ax)
+        if len(lista_num) % 2 != 0:
+            fig.delaxes(axes[-1])
 
+        
         plt.tight_layout()
 
     def correlacion(self, tamano_grafica = (7, 5)):

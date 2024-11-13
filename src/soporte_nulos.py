@@ -17,6 +17,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+
+#! FUNCIONES
+#!-------------
+
+def porcentaje_nulos(df):
+    
+    porcentaje = df.isnull().mean() * 100
+
+    return porcentaje[porcentaje > 0].sort_values(ascending=False)
+
+
+
+#! CLASE
+#!-------------
+
 class GestionNulos:
     """
     Clase para gestionar los valores nulos en un DataFrame.
